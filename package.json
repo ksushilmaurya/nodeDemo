@@ -13,6 +13,7 @@
     "express": "~4.15.5",
     "mongodb": "^2.2.35",
     "morgan": "~1.9.0",
+    "objectid": "^3.2.1",
     "pug": "2.0.0-beta11",
     "save": "^2.3.2",
     "serve-favicon": "~2.4.5",

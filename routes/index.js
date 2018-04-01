@@ -4,6 +4,9 @@ var grettings = require('./greetings');
 var dummy=require('../dummyDatabase');
 var messages = require("./messages");
 
+
+var commonFunction = require("./commonFunction");
+
 console.log("greeting import - ",grettings);
 
 /* GET home page. */
@@ -91,33 +94,7 @@ router.get('/getdata', function(req, res, next) {
  
  ////////////////Get Studentdata/////////////////
 
- router.get('/getStudentInfo', function(req, res, next) {
-	var name = req.query.name;
-	console.log("name to be searched ",name);
-	MongoClient.connect(url,function(err,db){
-	console.log("student going to find - ",name);
-	db.collection('studnet').find({name : name}).toArray(function(err,result){
-		console.log("user found",result);
-		studentId = result[0]._id;
-		
-		console.log("student id",studentId);
-		teacherId = teacherId.toString();
-		console.log("teacherId is -",studentId, typeof studentId)
-		if(studentId)
-		 { 
-		 	console.log("details");
-		  db.collection('details').find({studentId : studentId}).toArray(function(err,result){
-		  console.log("user found",result);
-		  db.close()
-		});
-	}
-
-	});
-
-});
-
-});
-
+ 
 
 
  /////////////////////////////////////////
@@ -634,6 +611,48 @@ var getStudentByTeacherId = function(teacherId,cb) {
 
 	});
 }
+
+
+
+router.get('/getStudentInfo', function(req, res, next) {
+	console.log("req.query is - ",req.query);
+
+	var studentName = req.query.name;
+	var finalRespose = {};
+	commonFunction.getStudentInfo(studentName, function(studentResponse) {
+		console.log("student response is - ",studentResponse);
+		if(studentResponse.success) {
+			if(studentResponse.data.length > 0) {
+				var student = studentResponse.data[0];
+				console.log("student found going for furture operation",student);
+				var studentId = student._id;
+				var teacherId = student.teacherId;
+				finalRespose.studentName = student.name;
+				finalRespose.email = student.email;
+				console.log("student id is -",studentId);
+				commonFunction.getTeacherDetailsForStudent(teacherId,function(teacherResponse) {
+					console.log("teacher details-",teacherResponse);
+					if(teacherResponse.success) {
+						if(teacherResponse.data.length > 0) {
+							var teacher = teacherResponse.data[0];
+							finalRespose.teacherName = teacher.name;
+							return res.send({status: 200, data: finalRespose});
+						} else {
+							return res.send({status: 200, msg: "Teacher does not exist"});
+						}
+					} else {
+						return res.send({status : 201 ,msg : teacherResponse.msg})
+					}
+				});
+			} else {
+				return res.send({status: 200, msg: "Student does not exist"});
+			}
+		} else {
+			return res.send({status: 201, msg: studentResponse.msg})
+		}
+	})
+});
+
 
 
 
