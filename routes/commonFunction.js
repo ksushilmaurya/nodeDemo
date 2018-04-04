@@ -44,3 +44,26 @@ exports.getTeacherDetailsForStudent = function(teacherId,cb) {
 	});
 
 }
+
+exports.getAddressDetailsOfStudent = function(studentId,cb) {
+	console.log("studentId is -",studentId, typeof studentId);
+	MongoClient.connect(url,function(err,db){ 
+		if(err) {
+			return cb({success : false ,msg : "Something went wrong"});
+		} else {
+			console.log("db connection done");
+			db.collection('details').find({studentId : studentId.toString()}).toArray(function(err,result){
+				db.close();
+				if(err) {
+					return cb({success : false ,msg : "Something went wrong"});
+				} else {
+					console.log("details found -",result);
+					return cb({success : true ,data : result});
+				}
+
+			});
+		}
+
+	});
+
+}

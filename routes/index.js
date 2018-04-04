@@ -630,20 +630,43 @@ router.get('/getStudentInfo', function(req, res, next) {
 				finalRespose.studentName = student.name;
 				finalRespose.email = student.email;
 				console.log("student id is -",studentId);
+
+
 				commonFunction.getTeacherDetailsForStudent(teacherId,function(teacherResponse) {
 					console.log("teacher details-",teacherResponse);
 					if(teacherResponse.success) {
+
 						if(teacherResponse.data.length > 0) {
 							var teacher = teacherResponse.data[0];
 							finalRespose.teacherName = teacher.name;
-							return res.send({status: 200, data: finalRespose});
+							// return res.send({status: 200, data: finalRespose});
 						} else {
-							return res.send({status: 200, msg: "Teacher does not exist"});
+							// return res.send({status: 200, msg: "Teacher does not exist"});
+							finalRespose.teacherName = "";
 						}
+
+						commonFunction.getAddressDetailsOfStudent(studentId, function(addressResponse) {
+							if(addressResponse.success) {
+
+								if(addressResponse.data.length > 0) {
+									finalRespose.address = addressResponse.data[0].address;
+								} else {
+									finalRespose.address = "";
+								}
+								res.send({status:200, data: finalRespose});
+
+							} else {
+								return res.send({status : 201 ,msg : addressResponse.msg})
+							}
+						})
+
+					
 					} else {
 						return res.send({status : 201 ,msg : teacherResponse.msg})
 					}
 				});
+
+
 			} else {
 				return res.send({status: 200, msg: "Student does not exist"});
 			}
